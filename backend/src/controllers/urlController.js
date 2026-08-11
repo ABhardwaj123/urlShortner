@@ -1,28 +1,178 @@
 import { Url } from "../models/url.models.js"
-import generateShortCode from "../utils/generateShortCode"
+import generateShortCode from "../utils/generateShortCode.js"
+
 
 
 const createShortUrl = async (req , res) => {
-    const {url} = req.body
+    try{
+        const {url} = req.body
 
-    const existingUrl = await Url.findOne({url})
+        if (!url) {
+            return res.status(400).json({ message: 'url is required' });
+        }
 
-    if(existingUrl){
+        const existingUrl = await Url.findOne({url})
+
+        if(existingUrl){
+            return res.status(200).json({
+                message: "short url has already been created for this url",
+                existingUrl
+            })
+        }
+
+        const shortCode = generateShortCode()
+
+        const newUrl = await Url.create({
+            url: url,
+            shortCode: shortCode,
+            accessCount: 0
+        })
+
+        return res.status(201).json({
+            newUrl,
+            message: "new entry is created successfully"
+        })
+    }catch(err){
+        res.status(500).json({ message: 'Something went wrong', error: err.message });
+    }
+}
+
+
+const getOriginalUrl = async(req , res) => {
+    
+    try{
+        const {shortCode} = req.params
+
+        if(!shortCode){
+            return res.status(400).json({
+                message: 'short code is required'
+            })
+        }
+
+        const doc = await Url.findOne({
+            shortCode: shortCode
+        })
+
+        if(!doc){
+            return res.status(404).json({
+                message: 'short code not found'
+            })
+        }
+
         return res.status(200).json({
-            message: "short url has already been created for this url"
+            doc,
+            message: 'original doc fetched successfully'
+        })
+
+
+    }catch(err){
+        return res.status(500).json({
+            message: 'Something went wrong',
+            error: err.message
         })
     }
-
-    const shortCode = generateShortCode()
-
-    const newUrl = Url.create({
-        url: url,
-        shortCode: shortCode,
-        accessCount: 0
-    })
-
-    return res.status(200).json({
-        newUrl,
-        message: "new entry is created successfully"
-    })
 }
+
+
+const updateShortUrl = async(req , res) => {
+
+
+    try{
+        const {shortCode} = req.params
+        const {url} = req.body
+
+        if(!url){
+            return res.status(400).json({
+                message: 'url is required'
+            })
+        }
+
+        const updatedDoc = await Url.findOneAndUpdate({ shortCode }, { url }, { new: true })
+
+         if (!updatedDoc) {
+            return res.status(404).json({ message: 'short code not found' })
+        }
+
+        return res.status(200).json({
+            updatedDoc,
+            message: 'entry updated successfully'
+        })
+
+    }catch(err){
+        return res.status(500).json({
+            message: 'Something went wrong',
+            error: err.message
+        })
+    }
+}
+
+
+const deleteShortUrl = async(req , res) => {
+    
+    try{
+    
+        const {shortCode} = req.params
+
+        if(!shortCode){
+            return res.status(400).json({
+                message: 'short code is required'
+            })
+        }
+
+        const doc = await Url.findOneAndDelete({
+            shortCode
+        })
+
+        if (!doc) {
+            return res.status(404).json({ message: 'short code not found' })
+        }
+
+        return res.status(204).json({
+            message: 'entry deleted successfully'
+        })
+
+    }catch(err){
+        return res.status(500).json({
+            message: 'Something went wrong',
+            error: err.message
+        })
+    }
+}
+
+
+const getUrlStats = async(req , res) => {
+
+    try{
+        const {shortCode} = req.params
+
+        if(!shortCode){
+            return res.status(400).json({
+                message: 'short code is required'
+            })
+        }
+
+        const doc = await Url.findOne({
+            shortCode
+        })
+
+        if(!doc){
+            return res.status(400).json({
+                message: 'short code not found in database'
+            })
+        }
+
+        return res.status(200).json({
+            doc,
+            message: 'data fetched successfully'
+        })
+
+
+    }catch(err){
+        return res.status(500).json({
+            message: 'Something went wrong',
+            error: err.message
+        })
+    }
+}
+
+export { createShortUrl, getOriginalUrl, updateShortUrl, deleteShortUrl, getUrlStats }
