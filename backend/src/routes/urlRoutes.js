@@ -4,16 +4,20 @@ import {
   getOriginalUrl,
   updateShortUrl,
   deleteShortUrl,
-  getUrlStats
+  getUrlStats,
+  getMyUrls
 } from '../controllers/urlController.js';
+
+import { protect , optionalAuth } from '../middleware/authMiddleware.js'
 
 const router = express.Router();
 
-router.post('/', createShortUrl);
+router.post('/', optionalAuth , createShortUrl);
+router.get('/', protect, getMyUrls);
 router.get('/:shortCode', getOriginalUrl);
-router.put('/:shortCode', updateShortUrl);
-router.delete('/:shortCode', deleteShortUrl);
-router.get('/:shortCode/stats', getUrlStats);
+router.put('/:shortCode', protect , updateShortUrl);
+router.delete('/:shortCode', protect , deleteShortUrl);
+router.get('/:shortCode/stats', protect , getUrlStats);
 
 export default router;
 
