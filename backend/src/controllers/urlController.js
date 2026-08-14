@@ -13,12 +13,14 @@ const createShortUrl = async (req , res) => {
 
         const existingUrl = await Url.findOne({url})
 
-        if(existingUrl){
-            return res.status(200).json({
-                message: "short url has already been created for this url",
-                existingUrl
-            })
-        }
+        // if(existingUrl){
+        //     return res.status(200).json({
+        //         message: "short url has already been created for this url",
+        //         newUrl: existingUrl
+        //     })
+        // }
+
+        //reuse condition
 
         const shortCode = generateShortCode()
 
