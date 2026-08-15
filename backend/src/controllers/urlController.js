@@ -13,14 +13,14 @@ const createShortUrl = async (req , res) => {
 
         const existingUrl = await Url.findOne({url})
 
-        // if(existingUrl){
-        //     return res.status(200).json({
-        //         message: "short url has already been created for this url",
-        //         newUrl: existingUrl
-        //     })
-        // }
+        const isSameOwner = existingUrl && req.user?.id && existingUrl.userId?.toString() === req.user.id
 
-        //reuse condition
+        if (isSameOwner) {
+            return res.status(200).json({
+                message: "short url has already been created for this url",
+                newUrl: existingUrl
+            })
+        }
 
         const shortCode = generateShortCode()
 
@@ -96,7 +96,7 @@ const updateShortUrl = async(req , res) => {
             return res.status(404).json({ message: 'short code not found' })
         }
 
-        //ownership check
+        
 
         if(existingDoc.userId && existingDoc.userId.toString() !== req.user.id){
             return res.status(403).json({
