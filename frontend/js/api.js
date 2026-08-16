@@ -1,5 +1,5 @@
 //this frontend's communication layer with the backend
-const BASE_URL = 'http://localhost:8000'
+const BASE_URL = 'https://urlshortner2-crl8.onrender.com'
 
 //localStorage is a browser API and it persists even after a page is loaded
 
